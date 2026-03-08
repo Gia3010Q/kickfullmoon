@@ -238,4 +238,3 @@ while task.wait(CHECK_INTERVAL) do
 
     statusLabel.Text = string.format("Time: %s\nMoon: %s", timeText, moon.display)
 end
-
