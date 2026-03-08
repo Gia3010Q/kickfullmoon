@@ -9,7 +9,7 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
 -- CONFIG
-local KICK_AFTER_HOUR = 5
+local KICK_AFTER_HOUR = 6
 local KICK_AFTER_MINUTE = 0
 local CHECK_INTERVAL = 1
 
@@ -238,3 +238,4 @@ while task.wait(CHECK_INTERVAL) do
 
     statusLabel.Text = string.format("Time: %s\nMoon: %s", timeText, moon.display)
 end
+
