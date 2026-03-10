@@ -123,6 +123,56 @@ local function createStatusUI()
         screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
     end
 
+    -- Nút toggle (luôn hiển thị)
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0, 40, 0, 40)
+    toggleBtn.Position = UDim2.new(1, -50, 0, 10)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    toggleBtn.BackgroundTransparency = 0.15
+    toggleBtn.BorderSizePixel = 0
+    toggleBtn.Font = Enum.Font.GothamBold
+    toggleBtn.TextSize = 20
+    toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 100)
+    toggleBtn.Text = "🌙"
+    toggleBtn.ZIndex = 10
+    toggleBtn.Parent = screenGui
+
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(0, 8)
+    toggleCorner.Parent = toggleBtn
+
+    -- Drag cho nút toggle (mobile)
+    local tDragging = false
+    local tDragStart = nil
+    local tStartPos = nil
+
+    toggleBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            tDragging = true
+            tDragStart = input.Position
+            tStartPos = toggleBtn.Position
+        end
+    end)
+
+    toggleBtn.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            tDragging = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if not tDragging then return end
+        if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
+        local delta = input.Position - tDragStart
+        toggleBtn.Position = UDim2.new(
+            tStartPos.X.Scale,
+            tStartPos.X.Offset + delta.X,
+            tStartPos.Y.Scale,
+            tStartPos.Y.Offset + delta.Y
+        )
+    end)
+
+    -- Frame chính
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(0, 350, 0, 170)
     frame.Position = UDim2.new(0.5, -175, 0, 60)
@@ -158,6 +208,12 @@ local function createStatusUI()
     info.Text = "Time: --:--\nMoon: ?/5"
     info.Parent = frame
 
+    -- Toggle bật/tắt frame
+    toggleBtn.MouseButton1Click:Connect(function()
+        frame.Visible = not frame.Visible
+    end)
+
+    -- Drag cho frame chính
     local dragging = false
     local dragStart = nil
     local startPos = nil
