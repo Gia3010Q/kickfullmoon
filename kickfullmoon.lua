@@ -43,6 +43,7 @@ local STATE = {
 local currentState = STATE.SEARCHING_FULL
 local seenFullStableTicks = 0
 local seenEndStableTicks = 0
+local seenWindowEndTicks = 0
 
 local function getServerTimeParts()
     local clock = Lighting.ClockTime
@@ -213,13 +214,24 @@ while task.wait(CHECK_INTERVAL) do
         end
 
     elseif currentState == STATE.FULL_ACTIVE then
-        if moon.isFull then
-            seenEndStableTicks = 0
-        else
+        -- Cách 1: Texture không còn full
+        if not moon.isFull then
             seenEndStableTicks = seenEndStableTicks + 1
-            if seenEndStableTicks >= STABLE_TICKS_FOR_END then
-                currentState = STATE.WAITING_END
-            end
+        else
+            seenEndStableTicks = 0
+        end
+
+        -- Cách 2 (backup): Ra khỏi cửa sổ thời gian full moon
+        -- Texture có thể không revert sau full moon, dùng time window để backup
+        if not inWindow then
+            seenWindowEndTicks = seenWindowEndTicks + 1
+        else
+            seenWindowEndTicks = 0
+        end
+
+        -- Chuyển state nếu 1 trong 2 điều kiện ổn định
+        if seenEndStableTicks >= STABLE_TICKS_FOR_END or seenWindowEndTicks >= STABLE_TICKS_FOR_END then
+            currentState = STATE.WAITING_END
         end
 
     elseif currentState == STATE.WAITING_END then
@@ -236,5 +248,5 @@ while task.wait(CHECK_INTERVAL) do
         break
     end
 
-    statusLabel.Text = string.format("Time: %s\nMoon: %s", timeText, moon.display)
+    statusLabel.Text = string.format("Time: %s\nMoon: %s\nState: %s", timeText, moon.display, currentState)
 end
